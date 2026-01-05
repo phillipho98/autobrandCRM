@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoBrand CRM | Client Management</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Hide app until authenticated */
+        .app { display: none; }
+        .app.authenticated { display: flex; }
+    </style>
+</head>
+<body>
+    <div class="app" id="app">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <a href="#" class="logo">
+                    <span class="logo-icon">◈</span>
+                    <span class="logo-text">AutoBrand</span>
+                </a>
+                <span class="logo-sub">CRM</span>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-item active" data-view="dashboard">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="7" height="7" rx="1"/>
+                        <rect x="14" y="3" width="7" height="7" rx="1"/>
+                        <rect x="3" y="14" width="7" height="7" rx="1"/>
+                        <rect x="14" y="14" width="7" height="7" rx="1"/>
+                    </svg>
+                    Dashboard
+                </a>
+                <a href="#" class="nav-item" data-view="leads">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+                    </svg>
+                    Leads
+                    <span class="nav-badge" id="leads-count">0</span>
+                </a>
+                <a href="#" class="nav-item" data-view="pipeline">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="8" y1="6" x2="21" y2="6"/>
+                        <line x1="8" y1="12" x2="21" y2="12"/>
+                        <line x1="8" y1="18" x2="21" y2="18"/>
+                        <circle cx="4" cy="6" r="2" fill="currentColor"/>
+                        <circle cx="4" cy="12" r="2" fill="currentColor"/>
+                        <circle cx="4" cy="18" r="2" fill="currentColor"/>
+                    </svg>
+                    Pipeline
+                </a>
+                <a href="#" class="nav-item" data-view="clients">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    Clients
+                    <span class="nav-badge" id="clients-count">0</span>
+                </a>
+                <a href="#" class="nav-item" data-view="services">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="2" y="7" width="20" height="14" rx="2"/>
+                        <path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
+                    </svg>
+                    Services
+                </a>
+                <a href="#" class="nav-item" data-view="tasks">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 11l3 3L22 4"/>
+                        <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                    </svg>
+                    Tasks
+                    <span class="nav-badge urgent" id="tasks-count">0</span>
+                </a>
+            </nav>
+            
+            <div class="sidebar-footer">
+                <button class="import-btn" id="import-leads-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    Import Leads
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Top Bar -->
+            <header class="top-bar">
+                <div class="search-container">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                    <input type="text" id="global-search" placeholder="Search leads, clients, deals...">
+                </div>
+                <div class="top-bar-actions">
+                    <button class="icon-btn" id="refresh-btn" title="Refresh Data">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="23 4 23 10 17 10"/>
+                            <polyline points="1 20 1 14 7 14"/>
+                            <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/>
+                        </svg>
+                    </button>
+                    <button class="primary-btn" id="add-new-btn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="5" x2="12" y2="19"/>
+                            <line x1="5" y1="12" x2="19" y2="12"/>
+                        </svg>
+                        Add New
+                    </button>
+                    <button class="icon-btn" id="logout-btn" title="Sign Out" onclick="logout()">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+                            <polyline points="16 17 21 12 16 7"/>
+                            <line x1="21" y1="12" x2="9" y2="12"/>
+                        </svg>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard View -->
+            <section class="view active" id="dashboard-view">
+                <div class="view-header">
+                    <h1>Dashboard</h1>
+                    <p class="view-subtitle">Your business at a glance</p>
+                </div>
+
+                <!-- KPI Cards -->
+                <div class="kpi-grid">
+                    <div class="kpi-card">
+                        <div class="kpi-icon leads">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+                                <circle cx="9" cy="7" r="4"/>
+                                <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/>
+                            </svg>
+                        </div>
+                        <div class="kpi-content">
+                            <span class="kpi-value" id="kpi-total-leads">0</span>
+                            <span class="kpi-label">Total Leads</span>
+                        </div>
+                        <div class="kpi-trend up">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                                <polyline points="17 6 23 6 23 12"/>
+                            </svg>
+                            <span id="kpi-leads-trend">+0%</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon pipeline">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                        </div>
+                        <div class="kpi-content">
+                            <span class="kpi-value" id="kpi-active-deals">0</span>
+                            <span class="kpi-label">Active Deals</span>
+                        </div>
+                        <div class="kpi-trend neutral">
+                            <span id="kpi-deals-value">$0</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon clients">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                                <circle cx="12" cy="7" r="4"/>
+                            </svg>
+                        </div>
+                        <div class="kpi-content">
+                            <span class="kpi-value" id="kpi-active-clients">0</span>
+                            <span class="kpi-label">Active Clients</span>
+                        </div>
+                        <div class="kpi-trend up">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                                <polyline points="17 6 23 6 23 12"/>
+                            </svg>
+                            <span id="kpi-clients-trend">+0%</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon revenue">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="1" x2="12" y2="23"/>
+                                <path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+                            </svg>
+                        </div>
+                        <div class="kpi-content">
+                            <span class="kpi-value" id="kpi-mrr">$0</span>
+                            <span class="kpi-label">Monthly Revenue</span>
+                        </div>
+                        <div class="kpi-trend up">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+                                <polyline points="17 6 23 6 23 12"/>
+                            </svg>
+                            <span id="kpi-mrr-trend">+0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dashboard Panels -->
+                <div class="dashboard-grid">
+                    <!-- Pipeline Overview -->
+                    <div class="dashboard-card pipeline-overview">
+                        <div class="card-header">
+                            <h3>Pipeline Overview</h3>
+                            <a href="#" class="card-link" data-view="pipeline">View All →</a>
+                        </div>
+                        <div class="pipeline-stages" id="pipeline-stages">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Hot Leads -->
+                    <div class="dashboard-card hot-leads">
+                        <div class="card-header">
+                            <h3>🔥 Hot Leads</h3>
+                            <a href="#" class="card-link" data-view="leads">View All →</a>
+                        </div>
+                        <div class="leads-list" id="hot-leads-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Upcoming Tasks -->
+                    <div class="dashboard-card upcoming-tasks">
+                        <div class="card-header">
+                            <h3>Upcoming Tasks</h3>
+                            <a href="#" class="card-link" data-view="tasks">View All →</a>
+                        </div>
+                        <div class="tasks-list" id="upcoming-tasks-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="dashboard-card activity-feed">
+                        <div class="card-header">
+                            <h3>Recent Activity</h3>
+                        </div>
+                        <div class="activity-list" id="activity-list">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Leads View -->
+            <section class="view" id="leads-view">
+                <div class="view-header">
+                    <h1>Leads</h1>
+                    <p class="view-subtitle">Manage your prospect pipeline</p>
+                </div>
+
+                <!-- Leads Toolbar -->
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <div class="filter-group">
+                            <label>Tier:</label>
+                            <select id="leads-tier-filter">
+                                <option value="all">All Tiers</option>
+                                <option value="hot">🔥 Hot</option>
+                                <option value="warm">🟡 Warm</option>
+                                <option value="cold">🔵 Cold</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Status:</label>
+                            <select id="leads-status-filter">
+                                <option value="all">All Status</option>
+                                <option value="new">New</option>
+                                <option value="contacted">Contacted</option>
+                                <option value="replied">Replied</option>
+                                <option value="qualified">Qualified</option>
+                                <option value="unqualified">Unqualified</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Source:</label>
+                            <select id="leads-source-filter">
+                                <option value="all">All Sources</option>
+                                <option value="scraper">Twitch Scraper</option>
+                                <option value="referral">Referral</option>
+                                <option value="inbound">Inbound</option>
+                                <option value="outbound">Outbound</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="toolbar-right">
+                        <button class="secondary-btn" id="export-leads-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                                <polyline points="7 10 12 15 17 10"/>
+                                <line x1="12" y1="15" x2="12" y2="3"/>
+                            </svg>
+                            Export
+                        </button>
+                        <button class="primary-btn" id="add-lead-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                            Add Lead
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Leads Table -->
+                <div class="table-container">
+                    <table class="data-table" id="leads-table">
+                        <thead>
+                            <tr>
+                                <th><input type="checkbox" id="select-all-leads"></th>
+                                <th data-sort="name">Name <span class="sort-icon">↕</span></th>
+                                <th data-sort="platform">Platform</th>
+                                <th data-sort="tier">Tier</th>
+                                <th data-sort="score">Score</th>
+                                <th data-sort="followers">Followers</th>
+                                <th data-sort="status">Status</th>
+                                <th data-sort="lastContact">Last Contact</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leads-table-body">
+                            <!-- Populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination" id="leads-pagination">
+                    <!-- Populated by JS -->
+                </div>
+            </section>
+
+            <!-- Pipeline View -->
+            <section class="view" id="pipeline-view">
+                <div class="view-header">
+                    <h1>Pipeline</h1>
+                    <p class="view-subtitle">Track your deals through each stage</p>
+                </div>
+
+                <div class="pipeline-board" id="pipeline-board">
+                    <div class="pipeline-column" data-stage="lead">
+                        <div class="column-header">
+                            <span class="stage-name">Lead</span>
+                            <span class="stage-count">0</span>
+                            <span class="stage-value">$0</span>
+                        </div>
+                        <div class="column-cards" data-stage="lead">
+                            <!-- Cards populated by JS -->
+                        </div>
+                    </div>
+                    <div class="pipeline-column" data-stage="qualified">
+                        <div class="column-header">
+                            <span class="stage-name">Qualified</span>
+                            <span class="stage-count">0</span>
+                            <span class="stage-value">$0</span>
+                        </div>
+                        <div class="column-cards" data-stage="qualified">
+                            <!-- Cards populated by JS -->
+                        </div>
+                    </div>
+                    <div class="pipeline-column" data-stage="proposal">
+                        <div class="column-header">
+                            <span class="stage-name">Proposal</span>
+                            <span class="stage-count">0</span>
+                            <span class="stage-value">$0</span>
+                        </div>
+                        <div class="column-cards" data-stage="proposal">
+                            <!-- Cards populated by JS -->
+                        </div>
+                    </div>
+                    <div class="pipeline-column" data-stage="negotiation">
+                        <div class="column-header">
+                            <span class="stage-name">Negotiation</span>
+                            <span class="stage-count">0</span>
+                            <span class="stage-value">$0</span>
+                        </div>
+                        <div class="column-cards" data-stage="negotiation">
+                            <!-- Cards populated by JS -->
+                        </div>
+                    </div>
+                    <div class="pipeline-column won" data-stage="won">
+                        <div class="column-header">
+                            <span class="stage-name">Won</span>
+                            <span class="stage-count">0</span>
+                            <span class="stage-value">$0</span>
+                        </div>
+                        <div class="column-cards" data-stage="won">
+                            <!-- Cards populated by JS -->
+                        </div>
+                    </div>
+                    <div class="pipeline-column lost" data-stage="lost">
+                        <div class="column-header">
+                            <span class="stage-name">Lost</span>
+                            <span class="stage-count">0</span>
+                            <span class="stage-value">$0</span>
+                        </div>
+                        <div class="column-cards" data-stage="lost">
+                            <!-- Cards populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Clients View -->
+            <section class="view" id="clients-view">
+                <div class="view-header">
+                    <h1>Clients</h1>
+                    <p class="view-subtitle">Manage your active client relationships</p>
+                </div>
+
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <div class="filter-group">
+                            <label>Status:</label>
+                            <select id="clients-status-filter">
+                                <option value="all">All</option>
+                                <option value="active">Active</option>
+                                <option value="onboarding">Onboarding</option>
+                                <option value="paused">Paused</option>
+                                <option value="churned">Churned</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Service:</label>
+                            <select id="clients-service-filter">
+                                <option value="all">All Services</option>
+                                <!-- Populated by JS -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="toolbar-right">
+                        <button class="primary-btn" id="add-client-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                            Add Client
+                        </button>
+                    </div>
+                </div>
+
+                <div class="clients-grid" id="clients-grid">
+                    <!-- Client cards populated by JS -->
+                </div>
+            </section>
+
+            <!-- Services View -->
+            <section class="view" id="services-view">
+                <div class="view-header">
+                    <h1>Services</h1>
+                    <p class="view-subtitle">Your automation service packages</p>
+                </div>
+
+                <div class="toolbar">
+                    <div class="toolbar-right">
+                        <button class="primary-btn" id="add-service-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                            Add Service
+                        </button>
+                    </div>
+                </div>
+
+                <div class="services-grid" id="services-grid">
+                    <!-- Service cards populated by JS -->
+                </div>
+            </section>
+
+            <!-- Tasks View -->
+            <section class="view" id="tasks-view">
+                <div class="view-header">
+                    <h1>Tasks</h1>
+                    <p class="view-subtitle">Follow-ups and action items</p>
+                </div>
+
+                <div class="toolbar">
+                    <div class="toolbar-left">
+                        <div class="filter-group">
+                            <label>Type:</label>
+                            <select id="tasks-type-filter">
+                                <option value="all">All Types</option>
+                                <option value="follow-up">Follow-up</option>
+                                <option value="outreach">Outreach</option>
+                                <option value="onboarding">Onboarding</option>
+                                <option value="support">Support</option>
+                                <option value="meeting">Meeting</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Status:</label>
+                            <select id="tasks-status-filter">
+                                <option value="pending">Pending</option>
+                                <option value="completed">Completed</option>
+                                <option value="all">All</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="toolbar-right">
+                        <button class="primary-btn" id="add-task-btn">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="12" y1="5" x2="12" y2="19"/>
+                                <line x1="5" y1="12" x2="19" y2="12"/>
+                            </svg>
+                            Add Task
+                        </button>
+                    </div>
+                </div>
+
+                <div class="tasks-container">
+                    <div class="tasks-section">
+                        <h3 class="tasks-section-title">
+                            <span class="overdue-dot"></span>
+                            Overdue
+                        </h3>
+                        <div class="tasks-list-full" id="overdue-tasks">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <div class="tasks-section">
+                        <h3 class="tasks-section-title">Today</h3>
+                        <div class="tasks-list-full" id="today-tasks">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <div class="tasks-section">
+                        <h3 class="tasks-section-title">This Week</h3>
+                        <div class="tasks-list-full" id="week-tasks">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    <div class="tasks-section">
+                        <h3 class="tasks-section-title">Later</h3>
+                        <div class="tasks-list-full" id="later-tasks">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal Container -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal" id="modal">
+            <div class="modal-header">
+                <h2 id="modal-title">Modal Title</h2>
+                <button class="modal-close" id="modal-close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Modal content populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal-overlay" id="import-modal-overlay">
+        <div class="modal import-modal">
+            <div class="modal-header">
+                <h2>Import Leads</h2>
+                <button class="modal-close" id="import-modal-close">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"/>
+                        <line x1="6" y1="6" x2="18" y2="18"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="import-dropzone" id="import-dropzone">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+                        <polyline points="17 8 12 3 7 8"/>
+                        <line x1="12" y1="3" x2="12" y2="15"/>
+                    </svg>
+                    <p>Drag and drop your CSV file here</p>
+                    <span>or</span>
+                    <label class="file-input-label">
+                        Browse Files
+                        <input type="file" id="import-file-input" accept=".csv,.xlsx" hidden>
+                    </label>
+                    <p class="hint">Supports CSV exports from Twitch Scraper</p>
+                </div>
+                <div class="import-preview" id="import-preview" style="display: none;">
+                    <h4>Preview</h4>
+                    <p id="import-summary"></p>
+                    <div class="import-actions">
+                        <button class="secondary-btn" id="import-cancel">Cancel</button>
+                        <button class="primary-btn" id="import-confirm">Import Leads</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Auth Scripts -->
+    <script src="config.js"></script>
+    <script src="auth.js"></script>
+    <script>
+        // Check authentication before loading app
+        if (!requireAuth()) {
+            // Will redirect to login
+        } else {
+            // Show the app
+            document.getElementById('app').classList.add('authenticated');
+        }
+    </script>
+    <script src="app.js"></script>
+</body>
+</html>
+
